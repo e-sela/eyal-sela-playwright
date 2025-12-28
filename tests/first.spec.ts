@@ -20,7 +20,7 @@ test.describe('Amazon search flows', () => {
   test('Amazon product price test', async () => {
     await amazon.navigateToAmazon();
     await amazon.searchProduct(toSearch);
-    await amazon.clickRandomProduct();
+    await  amazon.verifyAgeRange();
   });
 
   test('Amazon cart count is zero after search', async () => {

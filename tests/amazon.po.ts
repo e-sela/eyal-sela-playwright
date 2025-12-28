@@ -37,7 +37,7 @@ export class AmazonTest {
         const results = this.page.locator('[role="listitem"] .s-image');
         const count = await results.count();
         if (count === 0) throw new Error('No search results found!');
-        const randomIndex = Math.min(0, 10);
+        const randomIndex = Math.floor(Math.random() * 11);
         console.log(`Clicking product index: ${randomIndex}`);
         await results.nth(randomIndex).click();
         await this.page.waitForSelector('#availability');
