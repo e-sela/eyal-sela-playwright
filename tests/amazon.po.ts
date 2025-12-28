@@ -2,12 +2,16 @@ import { expect, Page } from '@playwright/test';
 import { Urls } from './enums/urls';
 import { AgeRange, ProductStatusColor, ProductStatusText } from './enums/products-status';
 import { getRandomEnumValue } from './utils/enum-utils';
+import { ContinueShopping } from './page/continue_shopping';
+import { MainShopping } from './page/main_shopping';
 
 export class AmazonTest {
     readonly page: Page;
+    readonly mainShopping: MainShopping;
 
     constructor(page: Page) {
         this.page = page;
+        this.mainShopping = new MainShopping(page);
     }
 
     async navigateToAmazon() {
@@ -17,13 +21,8 @@ export class AmazonTest {
     }
 
     async clickContinueShopping() {
-        const button = this.page.getByRole('button', { name: 'Continue shopping' });
-        if (await button.isVisible()) {
-            await button.click();
-            console.log('Clicked "Continue shopping" button');
-        } else {
-            console.log('"Continue shopping" button not found — skipping');
-        }
+        const continueShopping = new ContinueShopping(this.page);
+        await continueShopping.clickContinueShopping();
     }
 
     async searchProduct(productName: string) {
@@ -34,26 +33,12 @@ export class AmazonTest {
     }
 
     async clickRandomProduct() {
-        const results = this.page.locator('[role="listitem"] .s-image');
-        const count = await results.count();
-        if (count === 0) throw new Error('No search results found!');
-        const randomIndex = Math.floor(Math.random() * 11);
-        console.log(`Clicking product index: ${randomIndex}`);
-        await results.nth(randomIndex).click();
-        await this.page.waitForSelector('#availability');
+       this.mainShopping.clickRandomProduct();
     }
 
     async verifyInStockAndGreen() {
-        const availability = this.page.locator('#availability span');
-        const text = await availability.innerText();
-        console.log('Availability text:', text);
-        expect(text).toContain(ProductStatusText.IN_STOCK);
-
-        const color = await availability.evaluate((el) => {
-            return window.getComputedStyle(el).color;
-        });
-        console.log('Color:', color);
-        expect(color).toBe(ProductStatusColor.IN_STOCK);
+        expect(await this.mainShopping.getavailabilityText()).toContain(ProductStatusText.IN_STOCK);
+        expect(await this.mainShopping.getAvailabilityColor()).toBe(ProductStatusColor.IN_STOCK);
     }
 
         async verifyAgeRange(ageRange?: AgeRange) {
